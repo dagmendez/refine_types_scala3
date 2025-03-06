@@ -73,22 +73,23 @@ object common:
     case E // 22
 
   object ControlLetter:
-    def parse(letter: String): Either[InvalidControlLetter, ControlLetter] =
+    def parse(letter: String): Either[FailedValidation, ControlLetter] =
       Either.cond(
         ControlLetter.values.map(_.toString).contains(letter),
         ControlLetter.valueOf(letter),
         InvalidControlLetter(letter)
       )
 
-    def isValidId(number: Int, letter: ControlLetter): Boolean =
-      ControlLetter.fromOrdinal(number % 23) == letter
+  extension (cl: ControlLetter)
+    def isValidId(number: Int): Boolean =
+      ControlLetter.fromOrdinal(number % 23) == cl
 
   sealed trait FailedValidation(cause: String) extends Exception with NoStackTrace:
     override def toString: String = cause
-  case class InvalidNieLetter(wrongInput: String)     extends FailedValidation(s"'$wrongInput' is not a valid NIE letter")
-  case class InvalidIdLetter(wrongInput: String)      extends FailedValidation(s"'$wrongInput' is not a valid ID letter")
-  case class InvalidControlLetter(wrongInput: String) extends FailedValidation(s"'$wrongInput' does not match the associated remainder letter")
-  case class InvalidNumber(wrongInput: String)        extends FailedValidation(s"'$wrongInput' should only contain digits")
-  case class InvalidNegativeNumber(wrongInput: Int)   extends FailedValidation(s"'$wrongInput' is negative. It must be positive")
-  case class InvalidTooBigNumber(wrongInput: Int)     extends FailedValidation(s"'$wrongInput' is too big. Max number is 99999999")
-  case class InvalidIdTooLong(wrongInput: String)     extends FailedValidation(s"'$wrongInput' is too long. Max amount of characters is 9")
+  case class InvalidNieLetter(wrongInput: String)      extends FailedValidation(s"'$wrongInput' is not a valid NIE letter")
+  case class InvalidControlLetter(wrongInput: String)  extends FailedValidation(s"'$wrongInput' is not a valid ID letter")
+  case class InvalidId(wrongInput: String)             extends FailedValidation(s"'$wrongInput' does not match the associated remainder letter")
+  case class InvalidNumber(wrongInput: String)         extends FailedValidation(s"'$wrongInput' should only contain digits")
+  case class InvalidNegativeNumber(wrongInput: String) extends FailedValidation(s"'$wrongInput' is negative. It must be positive")
+  case class InvalidTooBigNumber(wrongInput: String)   extends FailedValidation(s"'$wrongInput' is too big. Max number is 99999999")
+  case class InvalidIdTooLong(wrongInput: String)      extends FailedValidation(s"'$wrongInput' is too long. Max amount of characters is 9")
