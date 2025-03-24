@@ -26,7 +26,7 @@ object Iron:
     def apply(number: Int, letter: String): Either[String | FailedValidation, DNI] =
       for
         number <- Number.either(number)
-        letter <- ControlLetter.parse(letter)
+        letter <- ControlLetter.make(letter)
         dni <- Either.cond(
           letter.isValidId(number),
           new DNI(number, letter),

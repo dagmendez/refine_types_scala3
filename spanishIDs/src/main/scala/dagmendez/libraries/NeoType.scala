@@ -19,16 +19,14 @@ object NeoType:
         case negative if negative.toInt < 0    => InvalidNegativeNumber(negative).toString
         case tooBig if tooBig.toInt > 99999999 => InvalidTooBigNumber(tooBig).toString
         case _                                 => true
-
-  type DNI = DNI.Type
+  
   object DNI extends Newtype[(ValidNumber, ControlLetter)]:
     override inline def validate(input: (ValidNumber, ControlLetter)): Boolean | String =
       val number = input._1.unwrap
       val letter = input._2
       if letter.isValidId(number.toInt) then true
       else InvalidId(number).toString
-
-  type NIE = NIE.type
+  
   object NIE extends Newtype[(NieLetter, ValidNumber, ControlLetter)]:
     override def validate(input: (NieLetter, ValidNumber, ControlLetter)): Boolean | String =
       val nieLetter     = input._1
@@ -37,29 +35,28 @@ object NeoType:
       val composeNumber = s"${nieLetter.ordinal}$number".toInt
       if letter.isValidId(composeNumber) then true
       else InvalidId(s"$nieLetter-$number").toString
-
-  type ID = ID.type
+  
   object ID extends Newtype[String]:
     override def validate(input: String): Boolean | String =
-      if input.length > 9
-      then InvalidIdTooLong(input).toString
+      if input.length > 9 then InvalidIdTooLong(input).toString
       else
         val (number, letter) = input.splitAt(8)
         val isDni            = number.head.isDigit
         val result =
-          if isDni
-          then
+          if isDni then
             for
               n <- ValidNumber.make(number)
-              l <- ControlLetter.parse(letter).swap.map(_.toString).swap
-            yield DNI.make(n, l)
+              l <- ControlLetter.make(letter).swap.map(_.toString).swap
+              dni <- DNI.make(n, l)
+            yield dni
           else
             for
-              nl <- NieLetter.parse(number.head.toString).swap.map(_.toString).swap
+              nl <- NieLetter.make(number.head.toString).swap.map(_.toString).swap
               n  <- ValidNumber.make(number.tail)
-              l  <- ControlLetter.parse(letter).swap.map(_.toString).swap
-            yield NIE.make(nl, n, l)
-        result.flatMap(either => either.map(_ => true)) match
+              l  <- ControlLetter.make(letter).swap.map(_.toString).swap
+              nie <- NIE.make(nl, n, l)
+            yield nie
+        result match
           case Left(error) => error
           case Right(_)    => true
 

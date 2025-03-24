@@ -4,32 +4,6 @@ import scala.util.control.NoStackTrace
 
 object common:
 
-  val controlLetter: Map[Int, String] = Map(
-    0  -> "T",
-    1  -> "R",
-    2  -> "W",
-    3  -> "A",
-    4  -> "G",
-    5  -> "M",
-    6  -> "Y",
-    7  -> "F",
-    8  -> "P",
-    9  -> "D",
-    10 -> "X",
-    11 -> "B",
-    12 -> "N",
-    13 -> "J",
-    14 -> "Z",
-    15 -> "S",
-    16 -> "Q",
-    17 -> "V",
-    18 -> "H",
-    19 -> "L",
-    20 -> "C",
-    21 -> "K",
-    22 -> "E"
-  )
-
   // Do NOT change the order of the enumeration.
   // The ordinal value of each letter corresponds with the remainder of number divided by 23
   enum NieLetter:
@@ -38,7 +12,7 @@ object common:
     case Z // 2
 
   object NieLetter:
-    def parse(letter: String): Either[InvalidNieLetter, NieLetter] =
+    def make(letter: String): Either[InvalidNieLetter, NieLetter] =
       Either.cond(
         NieLetter.values.map(_.toString).contains(letter),
         NieLetter.valueOf(letter),
@@ -73,7 +47,7 @@ object common:
     case E // 22
 
   object ControlLetter:
-    def parse(letter: String): Either[FailedValidation, ControlLetter] =
+    def make(letter: String): Either[InvalidControlLetter, ControlLetter] =
       Either.cond(
         ControlLetter.values.map(_.toString).contains(letter),
         ControlLetter.valueOf(letter),
@@ -87,7 +61,7 @@ object common:
   sealed trait FailedValidation(cause: String) extends Exception with NoStackTrace:
     override def toString: String = cause
   case class InvalidNieLetter(wrongInput: String)      extends FailedValidation(s"'$wrongInput' is not a valid NIE letter")
-  case class InvalidControlLetter(wrongInput: String)  extends FailedValidation(s"'$wrongInput' is not a valid ID letter")
+  case class InvalidControlLetter(wrongInput: String)  extends FailedValidation(s"'$wrongInput' is not a valid control letter")
   case class InvalidId(wrongInput: String)             extends FailedValidation(s"'$wrongInput' does not match the associated remainder letter")
   case class InvalidNumber(wrongInput: String)         extends FailedValidation(s"'$wrongInput' should only contain digits")
   case class InvalidNegativeNumber(wrongInput: String) extends FailedValidation(s"'$wrongInput' is negative. It must be positive")
