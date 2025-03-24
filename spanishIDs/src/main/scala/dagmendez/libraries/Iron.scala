@@ -1,8 +1,8 @@
 package dagmendez.libraries
 
-import dagmendez.common.ControlLetter
-import dagmendez.common.FailedValidation
-import dagmendez.common.InvalidControlLetter
+import dagmendez.libraries.common.ControlLetter
+import dagmendez.libraries.common.FailedValidation
+import dagmendez.libraries.common.InvalidId
 
 import io.github.iltotore.iron.:|
 import io.github.iltotore.iron.RefinedTypeOps
@@ -26,11 +26,11 @@ object Iron:
     def apply(number: Int, letter: String): Either[String | FailedValidation, DNI] =
       for
         number <- Number.either(number)
-        letter <- ControlLetter.either(letter)
+        letter <- ControlLetter.make(letter)
         dni <- Either.cond(
-          ControlLetter.isValidId(number, letter),
+          letter.isValidId(number),
           new DNI(number, letter),
-          InvalidControlLetter(letter.toString)
+          InvalidId(letter.toString)
         )
       yield dni
 
